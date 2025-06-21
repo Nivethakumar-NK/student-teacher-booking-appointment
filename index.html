@@ -188,7 +188,36 @@
 
     <script>
         // --- In-Memory Data Storage ---
-        let teachers = [];
+        // Default teachers added for convenience
+        let teachers = [
+            {
+                id: '_teacher_001',
+                name: 'Dr. Emily White',
+                department: 'Science',
+                subject: 'Biology',
+                email: 'emilywhite@example.com',
+                password: 'password123',
+                availableSlots: []
+            },
+            {
+                id: '_teacher_002',
+                name: 'Prof. David Lee',
+                department: 'Mathematics',
+                subject: 'Calculus',
+                email: 'davidlee@example.com',
+                password: 'password123',
+                availableSlots: []
+            },
+            {
+                id: '_teacher_003',
+                name: 'Ms. Sarah Chen',
+                department: 'Arts',
+                subject: 'Literature',
+                email: 'sarahchen@example.com',
+                password: 'password123',
+                availableSlots: []
+            }
+        ];
         let students = [];
         let appointments = [];
         let currentStudent = null;
@@ -846,8 +875,7 @@
             document.getElementById('navTeacher').addEventListener('click', () => showSection('teacherSection'));
             document.getElementById('navStudent').addEventListener('click', () => showSection('studentSection'));
 
-            // Initial render calls for admin/teacher sections if they were visible by default (not here, but good practice)
-            // If admin/teacher were logged in before, their dashboards won't show without backend, so we force login view.
+            // Ensure login views are shown initially
             document.getElementById('adminDashboard').classList.add('hidden');
             document.getElementById('adminLoginDiv').classList.remove('hidden');
 
