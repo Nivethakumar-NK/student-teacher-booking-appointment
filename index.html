@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student-Teacher Appointment Booking</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+    <div class="w-full max-w-4xl bg-white rounded-lg shadow-xl p-6 md:p-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-blue-700 mb-6">
+            <span class="text-indigo-600">Unified Mentor</span> - Appointment Booking
+        </h1>
+        <p class="text-sm text-center text-gray-600 mb-8 p-2 bg-yellow-100 border border-yellow-300 rounded-md">
+            <strong class="text-red-600">Note:</strong> This is a client-side simulation. All data is stored in memory and will be lost on page refresh.
+        </p>
+
+        <!-- Navigation -->
+        <nav class="flex justify-center space-x-2 md:space-x-4 mb-8">
+            <button id="navAdmin" class="px-4 py-2 md:px-6 md:py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out">Admin</button>
+            <button id="navTeacher" class="px-4 py-2 md:px-6 md:py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out">Teacher</button>
+            <button id="navStudent" class="px-4 py-2 md:px-6 md:py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out">Student</button>
+        </nav>
+
+        <!-- Admin Section -->
+        <section id="adminSection" class="hidden module-section p-6 border border-gray-200 rounded-lg bg-gray-50 mb-8">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4 text-center">Admin Panel</h2>
+
+            <!-- Admin Login -->
+            <div id="adminLoginDiv" class="p-4 bg-white rounded-md shadow-sm mb-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Admin Login</h3>
+                <input type="text" id="adminUsername" placeholder="Username" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                <input type="password" id="adminPassword" placeholder="Password" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                <button id="adminLoginBtn" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md transition duration-200">Login</button>
+                <p id="adminLoginMessage" class="text-red-500 text-sm mt-2 hidden text-center"></p>
+            </div>
+
+            <!-- Admin Dashboard (visible after login) -->
+            <div id="adminDashboard" class="hidden">
+                <!-- Add Teacher -->
+                <div class="p-4 bg-white rounded-md shadow-sm mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Add New Teacher</h3>
+                    <input type="text" id="teacherName" placeholder="Teacher Name" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="text" id="teacherDepartment" placeholder="Department" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="text" id="teacherSubject" placeholder="Subject" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <button id="addTeacherBtn" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition duration-200">Add Teacher</button>
+                    <p id="addTeacherMessage" class="text-green-500 text-sm mt-2 hidden text-center"></p>
+                </div>
+
+                <!-- Manage Teachers -->
+                <div class="p-4 bg-white rounded-md shadow-sm mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Manage Teachers</h3>
+                    <div id="teacherList" class="space-y-3">
+                        <!-- Teachers will be listed here -->
+                        <p class="text-gray-500 text-center">No teachers added yet.</p>
+                    </div>
+                </div>
+
+                <!-- Approve Student Registrations -->
+                <div class="p-4 bg-white rounded-md shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Approve Student Registrations</h3>
+                    <div id="pendingStudentsList" class="space-y-3">
+                        <!-- Pending students will be listed here -->
+                        <p class="text-gray-500 text-center">No pending student registrations.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Teacher Section -->
+        <section id="teacherSection" class="hidden module-section p-6 border border-gray-200 rounded-lg bg-gray-50 mb-8">
+            <h2 class="text-2xl font-bold text-blue-700 mb-4 text-center">Teacher Panel</h2>
+
+            <!-- Teacher Login -->
+            <div id="teacherLoginDiv" class="p-4 bg-white rounded-md shadow-sm mb-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Teacher Login</h3>
+                <input type="email" id="teacherLoginEmail" placeholder="Email (e.g., teacher@example.com)" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                <input type="password" id="teacherLoginPassword" placeholder="Password" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                <button id="teacherLoginBtn" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition duration-200">Login</button>
+                <p id="teacherLoginMessage" class="text-red-500 text-sm mt-2 hidden text-center"></p>
+            </div>
+
+            <!-- Teacher Dashboard (visible after login) -->
+            <div id="teacherDashboard" class="hidden">
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Welcome, <span id="loggedInTeacherName" class="text-blue-600"></span>!</h3>
+                <button id="teacherLogoutBtn" class="w-full py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-md transition duration-200 mb-6">Logout</button>
+
+                <!-- Schedule Appointment Slots -->
+                <div class="p-4 bg-white rounded-md shadow-sm mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Schedule Appointment Slots</h3>
+                    <input type="date" id="slotDate" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <input type="time" id="slotTime" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <input type="number" id="slotDuration" placeholder="Duration (minutes)" value="30" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <button id="addSlotBtn" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition duration-200">Add Slot</button>
+                    <p id="addSlotMessage" class="text-green-500 text-sm mt-2 hidden text-center"></p>
+                </div>
+
+                <!-- View All Appointments & Messages -->
+                <div class="p-4 bg-white rounded-md shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Your Appointments & Messages</h3>
+                    <div id="teacherAppointmentsList" class="space-y-3">
+                        <!-- Teacher's appointments will be listed here -->
+                        <p class="text-gray-500 text-center">No appointments scheduled yet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Student Section -->
+        <section id="studentSection" class="hidden module-section p-6 border border-gray-200 rounded-lg bg-gray-50 mb-8">
+            <h2 class="text-2xl font-bold text-green-700 mb-4 text-center">Student Panel</h2>
+
+            <!-- Student Register/Login -->
+            <div id="studentAuthDiv" class="p-4 bg-white rounded-md shadow-sm mb-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Student Register / Login</h3>
+                <input type="text" id="studentRegName" placeholder="Your Name" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                <input type="email" id="studentRegEmail" placeholder="Email (e.g., student@example.com)" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                <input type="password" id="studentRegPassword" placeholder="Password" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                <div class="flex space-x-2">
+                    <button id="studentRegisterBtn" class="w-1/2 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition duration-200">Register</button>
+                    <button id="studentLoginBtn" class="w-1/2 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-md transition duration-200">Login</button>
+                </div>
+                <p id="studentAuthMessage" class="text-red-500 text-sm mt-2 hidden text-center"></p>
+            </div>
+
+            <!-- Student Dashboard (visible after login) -->
+            <div id="studentDashboard" class="hidden">
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Welcome, <span id="loggedInStudentName" class="text-green-600"></span>!</h3>
+                <button id="studentLogoutBtn" class="w-full py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-md transition duration-200 mb-6">Logout</button>
+
+                <!-- Search Teacher -->
+                <div class="p-4 bg-white rounded-md shadow-sm mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Search Teacher</h3>
+                    <input type="text" id="searchTeacherInput" placeholder="Search by name, department, or subject" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                    <button id="searchTeacherBtn" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition duration-200">Search</button>
+                    <div id="teacherSearchResults" class="space-y-3 mt-4">
+                        <!-- Teacher search results will be listed here -->
+                        <p class="text-gray-500 text-center">No teachers found.</p>
+                    </div>
+                </div>
+
+                <!-- Book Appointment Form -->
+                <div id="bookAppointmentForm" class="p-4 bg-white rounded-md shadow-sm hidden">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Book Appointment with <span id="bookingTeacherName" class="font-bold"></span></h3>
+                    <input type="text" id="appointmentPurpose" placeholder="Purpose of appointment" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                    <select id="availableSlots" class="block w-full p-2 mb-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                        <option value="">Select an available slot</option>
+                    </select>
+                    <button id="confirmBookingBtn" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition duration-200">Confirm Booking</button>
+                    <button id="cancelBookingFormBtn" class="w-full mt-2 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md transition duration-200">Cancel</button>
+                    <p id="bookingMessage" class="text-red-500 text-sm mt-2 hidden text-center"></p>
+                </div>
+
+                <!-- View My Appointments -->
+                <div class="p-4 bg-white rounded-md shadow-sm mt-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">My Booked Appointments</h3>
+                    <div id="myAppointmentsList" class="space-y-3">
+                        <!-- Student's appointments will be listed here -->
+                        <p class="text-gray-500 text-center">No appointments booked yet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // --- In-Memory Data Storage ---
+        let teachers = [];
+        let students = [];
+        let appointments = [];
+        let currentStudent = null;
+        let currentTeacher = null;
+
+        // --- Utility Functions ---
+        function generateUniqueId() {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function displayMessage(elementId, message, type = 'success') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.remove('hidden', 'text-green-500', 'text-red-500');
+            if (type === 'success') {
+                element.classList.add('text-green-500');
+            } else {
+                element.classList.add('text-red-500');
+            }
+            setTimeout(() => {
+                element.classList.add('hidden');
+                element.textContent = '';
+            }, 3000);
+            console.log(`Log (${type}): ${message}`); // Logging for every action
+        }
+
+        function clearForm(formId) {
+            const form = document.getElementById(formId);
+            if (form) {
+                const inputs = form.querySelectorAll('input, textarea, select');
+                inputs.forEach(input => {
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                });
+            }
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.module-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        // --- Admin Module Functions ---
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = 'password';
+
+        document.getElementById('adminLoginBtn').addEventListener('click', () => {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                document.getElementById('adminLoginDiv').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                displayMessage('adminLoginMessage', 'Admin logged in successfully.', 'success');
+                renderTeachers();
+                renderPendingStudents();
+            } else {
+                displayMessage('adminLoginMessage', 'Invalid admin credentials.', 'error');
+            }
+        });
+
+        document.getElementById('addTeacherBtn').addEventListener('click', () => {
+            const name = document.getElementById('teacherName').value.trim();
+            const department = document.getElementById('teacherDepartment').value.trim();
+            const subject = document.getElementById('teacherSubject').value.trim();
+
+            if (name && department && subject) {
+                const newTeacher = {
+                    id: generateUniqueId(),
+                    name,
+                    department,
+                    subject,
+                    email: `${name.toLowerCase().replace(/\s/g, '')}@example.com`, // Mock email
+                    password: 'password123', // Mock password
+                    availableSlots: []
+                };
+                teachers.push(newTeacher);
+                displayMessage('addTeacherMessage', `Teacher '${name}' added!`, 'success');
+                renderTeachers();
+                clearForm('adminDashboard'); // Clear inputs in add teacher form
+            } else {
+                displayMessage('addTeacherMessage', 'Please fill all teacher fields.', 'error');
+            }
+        });
+
+        function renderTeachers() {
+            const teacherListDiv = document.getElementById('teacherList');
+            teacherListDiv.innerHTML = ''; // Clear previous list
+
+            if (teachers.length === 0) {
+                teacherListDiv.innerHTML = '<p class="text-gray-500 text-center">No teachers added yet.</p>';
+                return;
+            }
+
+            teachers.forEach(teacher => {
+                const teacherCard = document.createElement('div');
+                teacherCard.className = 'flex items-center justify-between p-3 bg-gray-100 rounded-md shadow-sm';
+                teacherCard.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-gray-800">${teacher.name}</p>
+                        <p class="text-sm text-gray-600">${teacher.department} - ${teacher.subject}</p>
+                        <p class="text-xs text-gray-500">Email: ${teacher.email}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="edit-teacher-btn px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white text-sm rounded-md" data-id="${teacher.id}">Edit</button>
+                        <button class="delete-teacher-btn px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md" data-id="${teacher.id}">Delete</button>
+                    </div>
+                `;
+                teacherListDiv.appendChild(teacherCard);
+            });
+
+            // Add event listeners for edit/delete
+            document.querySelectorAll('.delete-teacher-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const teacherId = event.target.dataset.id;
+                    teachers = teachers.filter(t => t.id !== teacherId);
+                    appointments = appointments.filter(a => a.teacherId !== teacherId); // Remove appointments for deleted teacher
+                    displayMessage('addTeacherMessage', 'Teacher deleted.', 'success'); // Reusing message element
+                    renderTeachers();
+                    renderTeacherAppointments(); // Update teacher's view if active
+                    renderStudentAppointments(); // Update student's view if active
+                });
+            });
+
+            // Edit functionality (simplified: prompts for new values)
+            document.querySelectorAll('.edit-teacher-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const teacherId = event.target.dataset.id;
+                    const teacherToEdit = teachers.find(t => t.id === teacherId);
+                    if (teacherToEdit) {
+                        const newName = prompt(`Edit name for ${teacherToEdit.name}:`, teacherToEdit.name);
+                        const newDept = prompt(`Edit department for ${teacherToEdit.name}:`, teacherToEdit.department);
+                        const newSubject = prompt(`Edit subject for ${teacherToEdit.name}:`, teacherToEdit.subject);
+
+                        if (newName !== null && newDept !== null && newSubject !== null) {
+                            teacherToEdit.name = newName.trim();
+                            teacherToEdit.department = newDept.trim();
+                            teacherToEdit.subject = newSubject.trim();
+                            teacherToEdit.email = `${newName.toLowerCase().replace(/\s/g, '')}@example.com`; // Update mock email
+                            displayMessage('addTeacherMessage', 'Teacher updated.', 'success');
+                            renderTeachers();
+                            renderTeacherAppointments(); // Update teacher's view if active
+                            renderStudentAppointments(); // Update student's view if active
+                        }
+                    }
+                });
+            });
+        }
+
+        function renderPendingStudents() {
+            const pendingStudentsListDiv = document.getElementById('pendingStudentsList');
+            pendingStudentsListDiv.innerHTML = ''; // Clear previous list
+
+            const pendingStudents = students.filter(s => !s.isApproved);
+
+            if (pendingStudents.length === 0) {
+                pendingStudentsListDiv.innerHTML = '<p class="text-gray-500 text-center">No pending student registrations.</p>';
+                return;
+            }
+
+            pendingStudents.forEach(student => {
+                const studentCard = document.createElement('div');
+                studentCard.className = 'flex items-center justify-between p-3 bg-gray-100 rounded-md shadow-sm';
+                studentCard.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-gray-800">${student.name}</p>
+                        <p class="text-sm text-gray-600">${student.email}</p>
+                    </div>
+                    <button class="approve-student-btn px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md" data-id="${student.id}">Approve</button>
+                `;
+                pendingStudentsListDiv.appendChild(studentCard);
+            });
+
+            document.querySelectorAll('.approve-student-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const studentId = event.target.dataset.id;
+                    const studentToApprove = students.find(s => s.id === studentId);
+                    if (studentToApprove) {
+                        studentToApprove.isApproved = true;
+                        displayMessage('addTeacherMessage', `Student '${studentToApprove.name}' approved.`, 'success'); // Reusing message element
+                        renderPendingStudents();
+                    }
+                });
+            });
+        }
+
+        // --- Teacher Module Functions ---
+        document.getElementById('teacherLoginBtn').addEventListener('click', () => {
+            const email = document.getElementById('teacherLoginEmail').value.trim();
+            const password = document.getElementById('teacherLoginPassword').value.trim();
+
+            const teacher = teachers.find(t => t.email === email && t.password === password);
+
+            if (teacher) {
+                currentTeacher = teacher;
+                document.getElementById('teacherLoginDiv').classList.add('hidden');
+                document.getElementById('teacherDashboard').classList.remove('hidden');
+                document.getElementById('loggedInTeacherName').textContent = currentTeacher.name;
+                displayMessage('teacherLoginMessage', `Welcome back, ${currentTeacher.name}!`, 'success');
+                renderTeacherAppointments();
+            } else {
+                displayMessage('teacherLoginMessage', 'Invalid teacher credentials.', 'error');
+            }
+        });
+
+        document.getElementById('teacherLogoutBtn').addEventListener('click', () => {
+            currentTeacher = null;
+            document.getElementById('teacherDashboard').classList.add('hidden');
+            document.getElementById('teacherLoginDiv').classList.remove('hidden');
+            document.getElementById('teacherLoginEmail').value = '';
+            document.getElementById('teacherLoginPassword').value = '';
+            displayMessage('teacherLoginMessage', 'Logged out successfully.', 'success');
+        });
+
+        document.getElementById('addSlotBtn').addEventListener('click', () => {
+            if (!currentTeacher) {
+                displayMessage('addSlotMessage', 'Please log in as a teacher.', 'error');
+                return;
+            }
+
+            const date = document.getElementById('slotDate').value;
+            const time = document.getElementById('slotTime').value;
+            const duration = parseInt(document.getElementById('slotDuration').value);
+
+            if (date && time && duration > 0) {
+                const newSlot = {
+                    id: generateUniqueId(),
+                    teacherId: currentTeacher.id,
+                    dateTime: new Date(`${date}T${time}`).toISOString(),
+                    durationMinutes: duration,
+                    isBooked: false,
+                    bookedByStudentId: null,
+                    message: null,
+                    status: 'available' // available, booked, cancelled
+                };
+                currentTeacher.availableSlots.push(newSlot);
+                displayMessage('addSlotMessage', `Appointment slot added for ${new Date(newSlot.dateTime).toLocaleString()}.`, 'success');
+                clearForm('teacherDashboard'); // Clear inputs for slot
+                renderTeacherAppointments();
+            } else {
+                displayMessage('addSlotMessage', 'Please provide valid date, time, and duration.', 'error');
+            }
+        });
+
+        function renderTeacherAppointments() {
+            const teacherAppointmentsListDiv = document.getElementById('teacherAppointmentsList');
+            teacherAppointmentsListDiv.innerHTML = '';
+
+            if (!currentTeacher) {
+                teacherAppointmentsListDiv.innerHTML = '<p class="text-gray-500 text-center">Please log in to view appointments.</p>';
+                return;
+            }
+
+            const teacherRelevantAppointments = appointments.filter(app => app.teacherId === currentTeacher.id)
+                .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime)); // Sort by date
+
+            const teacherSlots = currentTeacher.availableSlots
+                .filter(slot => !slot.isBooked) // Show available slots
+                .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+
+            if (teacherRelevantAppointments.length === 0 && teacherSlots.length === 0) {
+                teacherAppointmentsListDiv.innerHTML = '<p class="text-gray-500 text-center">No appointments or available slots found.</p>';
+                return;
+            }
+
+            // Display Available Slots
+            if (teacherSlots.length > 0) {
+                const availableSlotsHeader = document.createElement('h4');
+                availableSlotsHeader.className = 'text-lg font-semibold text-gray-700 mt-4 mb-2';
+                availableSlotsHeader.textContent = 'Available Slots:';
+                teacherAppointmentsListDiv.appendChild(availableSlotsHeader);
+
+                teacherSlots.forEach(slot => {
+                    const slotCard = document.createElement('div');
+                    slotCard.className = 'p-3 bg-blue-50 rounded-md shadow-sm flex items-center justify-between';
+                    slotCard.innerHTML = `
+                        <div>
+                            <p class="font-semibold text-blue-800">Available: ${new Date(slot.dateTime).toLocaleString()}</p>
+                            <p class="text-sm text-blue-600">${slot.durationMinutes} minutes</p>
+                        </div>
+                        <!-- Optionally add a delete slot button if desired -->
+                        <button class="delete-slot-btn px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md" data-id="${slot.id}">Delete Slot</button>
+                    `;
+                    teacherAppointmentsListDiv.appendChild(slotCard);
+                });
+            }
+
+            // Display Booked Appointments
+            if (teacherRelevantAppointments.length > 0) {
+                const bookedAppointmentsHeader = document.createElement('h4');
+                bookedAppointmentsHeader.className = 'text-lg font-semibold text-gray-700 mt-4 mb-2';
+                bookedAppointmentsHeader.textContent = 'Booked Appointments:';
+                teacherAppointmentsListDiv.appendChild(bookedAppointmentsHeader);
+
+                teacherRelevantAppointments.forEach(app => {
+                    const student = students.find(s => s.id === app.studentId);
+                    const studentName = student ? student.name : 'Unknown Student';
+                    const studentEmail = student ? student.email : 'N/A';
+
+                    const appCard = document.createElement('div');
+                    appCard.className = `p-3 rounded-md shadow-sm ${app.status === 'approved' ? 'bg-green-50' : app.status === 'cancelled' ? 'bg-red-50' : 'bg-yellow-50'} mb-2`;
+                    appCard.innerHTML = `
+                        <p class="font-semibold text-gray-800">With ${studentName} (${studentEmail})</p>
+                        <p class="text-sm text-gray-700">On: ${new Date(app.dateTime).toLocaleString()}</p>
+                        <p class="text-sm text-gray-700">Purpose: ${app.purpose}</p>
+                        <p class="text-sm text-gray-700">Status: <span class="font-bold capitalize">${app.status}</span></p>
+                        ${app.message ? `<p class="text-sm text-gray-700">Student Message: "${app.message}"</p>` : ''}
+                        <div class="flex space-x-2 mt-2">
+                            ${app.status === 'pending' ? `
+                                <button class="approve-appointment-btn px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md" data-id="${app.id}">Approve</button>
+                                <button class="cancel-appointment-btn px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md" data-id="${app.id}">Cancel</button>
+                            ` : app.status === 'approved' ? `
+                                <button class="cancel-appointment-btn px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md" data-id="${app.id}">Cancel</button>
+                            ` : ''}
+                        </div>
+                    `;
+                    teacherAppointmentsListDiv.appendChild(appCard);
+                });
+            }
+
+            // Add event listeners for appointment actions
+            document.querySelectorAll('.approve-appointment-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const appId = event.target.dataset.id;
+                    const appointment = appointments.find(a => a.id === appId);
+                    if (appointment) {
+                        appointment.status = 'approved';
+                        displayMessage('teacherLoginMessage', 'Appointment approved.', 'success');
+                        renderTeacherAppointments();
+                        renderStudentAppointments(); // Update student's view
+                    }
+                });
+            });
+
+            document.querySelectorAll('.cancel-appointment-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const appId = event.target.dataset.id;
+                    const appointment = appointments.find(a => a.id === appId);
+                    if (appointment) {
+                        appointment.status = 'cancelled';
+                        // Make the slot available again
+                        const slot = currentTeacher.availableSlots.find(s => s.id === appointment.slotId);
+                        if (slot) {
+                            slot.isBooked = false;
+                            slot.bookedByStudentId = null;
+                            slot.message = null;
+                            slot.status = 'available';
+                        }
+                        displayMessage('teacherLoginMessage', 'Appointment cancelled.', 'success');
+                        renderTeacherAppointments();
+                        renderStudentAppointments(); // Update student's view
+                    }
+                });
+            });
+
+            document.querySelectorAll('.delete-slot-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const slotId = event.target.dataset.id;
+                    if (currentTeacher) {
+                        currentTeacher.availableSlots = currentTeacher.availableSlots.filter(s => s.id !== slotId);
+                        // Also remove any appointments linked to this slot
+                        appointments = appointments.filter(app => app.slotId !== slotId);
+                        displayMessage('addSlotMessage', 'Slot deleted.', 'success');
+                        renderTeacherAppointments();
+                        renderStudentAppointments(); // Update student's view
+                    }
+                });
+            });
+        }
+
+        // --- Student Module Functions ---
+        document.getElementById('studentRegisterBtn').addEventListener('click', () => {
+            const name = document.getElementById('studentRegName').value.trim();
+            const email = document.getElementById('studentRegEmail').value.trim();
+            const password = document.getElementById('studentRegPassword').value.trim();
+
+            if (name && email && password) {
+                if (students.some(s => s.email === email)) {
+                    displayMessage('studentAuthMessage', 'Account with this email already exists.', 'error');
+                    return;
+                }
+                const newStudent = {
+                    id: generateUniqueId(),
+                    name,
+                    email,
+                    password,
+                    isApproved: false // Requires admin approval
+                };
+                students.push(newStudent);
+                displayMessage('studentAuthMessage', 'Registration successful! Awaiting admin approval.', 'success');
+                clearForm('studentAuthDiv');
+                renderPendingStudents(); // Update admin view
+            } else {
+                displayMessage('studentAuthMessage', 'Please fill all registration fields.', 'error');
+            }
+        });
+
+        document.getElementById('studentLoginBtn').addEventListener('click', () => {
+            const email = document.getElementById('studentRegEmail').value.trim();
+            const password = document.getElementById('studentRegPassword').value.trim();
+
+            const student = students.find(s => s.email === email && s.password === password);
+
+            if (student) {
+                if (!student.isApproved) {
+                    displayMessage('studentAuthMessage', 'Your account is pending admin approval.', 'error');
+                    return;
+                }
+                currentStudent = student;
+                document.getElementById('studentAuthDiv').classList.add('hidden');
+                document.getElementById('studentDashboard').classList.remove('hidden');
+                document.getElementById('loggedInStudentName').textContent = currentStudent.name;
+                displayMessage('studentAuthMessage', `Welcome back, ${currentStudent.name}!`, 'success');
+                renderStudentAppointments();
+            } else {
+                displayMessage('studentAuthMessage', 'Invalid student credentials or account not found.', 'error');
+            }
+        });
+
+        document.getElementById('studentLogoutBtn').addEventListener('click', () => {
+            currentStudent = null;
+            document.getElementById('studentDashboard').classList.add('hidden');
+            document.getElementById('studentAuthDiv').classList.remove('hidden');
+            document.getElementById('studentRegName').value = '';
+            document.getElementById('studentRegEmail').value = '';
+            document.getElementById('studentRegPassword').value = '';
+            displayMessage('studentAuthMessage', 'Logged out successfully.', 'success');
+        });
+
+        document.getElementById('searchTeacherBtn').addEventListener('click', () => {
+            const query = document.getElementById('searchTeacherInput').value.trim().toLowerCase();
+            const searchResultsDiv = document.getElementById('teacherSearchResults');
+            searchResultsDiv.innerHTML = '';
+
+            const filteredTeachers = teachers.filter(teacher =>
+                teacher.name.toLowerCase().includes(query) ||
+                teacher.department.toLowerCase().includes(query) ||
+                teacher.subject.toLowerCase().includes(query)
+            );
+
+            if (filteredTeachers.length === 0) {
+                searchResultsDiv.innerHTML = '<p class="text-gray-500 text-center">No teachers found matching your criteria.</p>';
+                return;
+            }
+
+            filteredTeachers.forEach(teacher => {
+                const teacherCard = document.createElement('div');
+                teacherCard.className = 'p-3 bg-white rounded-md shadow-sm flex items-center justify-between';
+                teacherCard.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-gray-800">${teacher.name}</p>
+                        <p class="text-sm text-gray-600">${teacher.department} - ${teacher.subject}</p>
+                    </div>
+                    <button class="book-teacher-btn px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md" data-id="${teacher.id}">Book</button>
+                `;
+                searchResultsDiv.appendChild(teacherCard);
+            });
+
+            // Add event listeners for booking
+            document.querySelectorAll('.book-teacher-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const teacherId = event.target.dataset.id;
+                    showBookAppointmentForm(teacherId);
+                });
+            });
+        });
+
+        function showBookAppointmentForm(teacherId) {
+            if (!currentStudent) {
+                displayMessage('studentAuthMessage', 'Please log in to book an appointment.', 'error');
+                return;
+            }
+
+            const teacher = teachers.find(t => t.id === teacherId);
+            if (!teacher) {
+                displayMessage('bookingMessage', 'Teacher not found.', 'error');
+                return;
+            }
+
+            document.getElementById('bookingTeacherName').textContent = teacher.name;
+            document.getElementById('bookAppointmentForm').classList.remove('hidden');
+
+            const availableSlotsSelect = document.getElementById('availableSlots');
+            availableSlotsSelect.innerHTML = '<option value="">Select an available slot</option>';
+
+            const now = new Date();
+            const futureAvailableSlots = teacher.availableSlots
+                .filter(slot => !slot.isBooked && new Date(slot.dateTime) > now)
+                .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+
+            if (futureAvailableSlots.length === 0) {
+                availableSlotsSelect.innerHTML = '<option value="">No future available slots for this teacher.</option>';
+                availableSlotsSelect.disabled = true;
+                document.getElementById('confirmBookingBtn').disabled = true;
+            } else {
+                availableSlotsSelect.disabled = false;
+                document.getElementById('confirmBookingBtn').disabled = false;
+                futureAvailableSlots.forEach(slot => {
+                    const option = document.createElement('option');
+                    option.value = slot.id;
+                    option.textContent = `${new Date(slot.dateTime).toLocaleString()} (${slot.durationMinutes} mins)`;
+                    availableSlotsSelect.appendChild(option);
+                });
+            }
+
+            // Store the selected teacher's ID on the form itself for easy access later
+            document.getElementById('bookAppointmentForm').dataset.teacherId = teacherId;
+        }
+
+        document.getElementById('cancelBookingFormBtn').addEventListener('click', () => {
+            document.getElementById('bookAppointmentForm').classList.add('hidden');
+            clearForm('bookAppointmentForm');
+            displayMessage('bookingMessage', '', 'success'); // Clear any messages
+        });
+
+        document.getElementById('confirmBookingBtn').addEventListener('click', () => {
+            if (!currentStudent) {
+                displayMessage('bookingMessage', 'Please log in to book an appointment.', 'error');
+                return;
+            }
+
+            const teacherId = document.getElementById('bookAppointmentForm').dataset.teacherId;
+            const slotId = document.getElementById('availableSlots').value;
+            const purpose = document.getElementById('appointmentPurpose').value.trim();
+
+            if (!slotId || !purpose) {
+                displayMessage('bookingMessage', 'Please select a slot and enter the purpose.', 'error');
+                return;
+            }
+
+            const teacher = teachers.find(t => t.id === teacherId);
+            const slot = teacher.availableSlots.find(s => s.id === slotId);
+
+            if (teacher && slot && !slot.isBooked) {
+                slot.isBooked = true;
+                slot.bookedByStudentId = currentStudent.id;
+                slot.status = 'booked';
+
+                const newAppointment = {
+                    id: generateUniqueId(),
+                    teacherId: teacher.id,
+                    studentId: currentStudent.id,
+                    slotId: slot.id,
+                    dateTime: slot.dateTime,
+                    durationMinutes: slot.durationMinutes,
+                    purpose: purpose,
+                    message: null, // Student can send message later
+                    status: 'pending' // Pending teacher approval
+                };
+                appointments.push(newAppointment);
+
+                displayMessage('bookingMessage', `Appointment booked successfully with ${teacher.name}! Awaiting teacher approval.`, 'success');
+                document.getElementById('bookAppointmentForm').classList.add('hidden');
+                clearForm('bookAppointmentForm');
+                renderStudentAppointments();
+                renderTeacherAppointments(); // Update teacher's view
+            } else {
+                displayMessage('bookingMessage', 'Selected slot is no longer available or an error occurred.', 'error');
+            }
+        });
+
+        function renderStudentAppointments() {
+            const myAppointmentsListDiv = document.getElementById('myAppointmentsList');
+            myAppointmentsListDiv.innerHTML = '';
+
+            if (!currentStudent) {
+                myAppointmentsListDiv.innerHTML = '<p class="text-gray-500 text-center">Please log in to view appointments.</p>';
+                return;
+            }
+
+            const studentAppointments = appointments.filter(app => app.studentId === currentStudent.id)
+                .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime)); // Sort by date
+
+            if (studentAppointments.length === 0) {
+                myAppointmentsListDiv.innerHTML = '<p class="text-gray-500 text-center">No appointments booked yet.</p>';
+                return;
+            }
+
+            studentAppointments.forEach(app => {
+                const teacher = teachers.find(t => t.id === app.teacherId);
+                const teacherName = teacher ? teacher.name : 'Unknown Teacher';
+
+                const appCard = document.createElement('div');
+                appCard.className = `p-3 rounded-md shadow-sm ${app.status === 'approved' ? 'bg-green-50' : app.status === 'cancelled' ? 'bg-red-50' : 'bg-yellow-50'} mb-2`;
+                appCard.innerHTML = `
+                    <p class="font-semibold text-gray-800">With ${teacherName}</p>
+                    <p class="text-sm text-gray-700">On: ${new Date(app.dateTime).toLocaleString()}</p>
+                    <p class="text-sm text-gray-700">Purpose: ${app.purpose}</p>
+                    <p class="text-sm text-gray-700">Status: <span class="font-bold capitalize">${app.status}</span></p>
+                    ${app.message ? `<p class="text-sm text-gray-700">Your message: "${app.message}"</p>` : ''}
+                    <div class="flex space-x-2 mt-2">
+                        ${app.status === 'pending' || app.status === 'approved' ? `
+                            <button class="send-message-btn px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md" data-id="${app.id}">Send Message</button>
+                            <button class="cancel-my-appointment-btn px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md" data-id="${app.id}">Cancel My Appointment</button>
+                        ` : ''}
+                    </div>
+                `;
+                myAppointmentsListDiv.appendChild(appCard);
+            });
+
+            document.querySelectorAll('.send-message-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const appId = event.target.dataset.id;
+                    const appointment = appointments.find(a => a.id === appId);
+                    if (appointment) {
+                        const message = prompt('Enter your message for the teacher:', appointment.message || '');
+                        if (message !== null) {
+                            appointment.message = message.trim();
+                            displayMessage('studentAuthMessage', 'Message sent.', 'success');
+                            renderStudentAppointments(); // Re-render to show message
+                            renderTeacherAppointments(); // Update teacher's view
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.cancel-my-appointment-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const appId = event.target.dataset.id;
+                    const appointment = appointments.find(a => a.id === appId);
+                    if (appointment && (appointment.status === 'pending' || appointment.status === 'approved')) {
+                        appointment.status = 'cancelled';
+                        // Make the slot available again
+                        const teacher = teachers.find(t => t.id === appointment.teacherId);
+                        if (teacher) {
+                            const slot = teacher.availableSlots.find(s => s.id === appointment.slotId);
+                            if (slot) {
+                                slot.isBooked = false;
+                                slot.bookedByStudentId = null;
+                                slot.message = null;
+                                slot.status = 'available';
+                            }
+                        }
+                        displayMessage('studentAuthMessage', 'Your appointment has been cancelled.', 'success');
+                        renderStudentAppointments();
+                        renderTeacherAppointments(); // Update teacher's view
+                    } else {
+                        displayMessage('studentAuthMessage', 'Appointment cannot be cancelled (already cancelled or not found).', 'error');
+                    }
+                });
+            });
+        }
+
+        // --- Initial Load and Navigation ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Default to student section
+            showSection('studentSection');
+
+            document.getElementById('navAdmin').addEventListener('click', () => showSection('adminSection'));
+            document.getElementById('navTeacher').addEventListener('click', () => showSection('teacherSection'));
+            document.getElementById('navStudent').addEventListener('click', () => showSection('studentSection'));
+
+            // Initial render calls for admin/teacher sections if they were visible by default (not here, but good practice)
+            // If admin/teacher were logged in before, their dashboards won't show without backend, so we force login view.
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('adminLoginDiv').classList.remove('hidden');
+
+            document.getElementById('teacherDashboard').classList.add('hidden');
+            document.getElementById('teacherLoginDiv').classList.remove('hidden');
+
+            document.getElementById('studentDashboard').classList.add('hidden');
+            document.getElementById('studentAuthDiv').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
