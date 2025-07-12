@@ -39,14 +39,13 @@ Extract the ZIP file on your computer.
 Open the extracted folder.
 Double-click "index.html" or right-click and choose "Open with" Your Browser(e.g.,chrome,firefox).
 ## Login Credentials
-Since this is a simulation with in-memory storage, here are the default credentials:
 Admin:
 Username: admin
 Password: password
 Teacher:
-Log in as Admin.
-Go to the Admin Panel and use the "Add New Teacher" section to add a teacher (e.g., Name: Dr. Alice, Department: Science, Subject: Physics).
-The mock email for this teacher will be generated as dralice@example.com (lowercase, no spaces).
+Teacher 1- email(dr.emilywhite@example.com) 
+Teacher 2- email(davidlee@example.com)
+Teacher 3- email(sarahchen@example.com)
 Password: password123 (This is a hardcoded default for all added teachers).
 Student:
 Go to the Student Panel.
